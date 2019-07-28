@@ -24,14 +24,15 @@ func NewShowHandler(e *echo.Echo, us services.Showservice) {
 	handler := &ShowHandler{
 		ShowService: us,
 	}
-	e.GET("/shows", handler.FetchShow)
+	e.GET("/shows", handler.GetShows)
+	e.GET("/shows/:id", handler.GetShowByID)
 	//e.POST("/articles", handler.Store)
 	//e.GET("/articles/:id", handler.GetByID)
 	//e.DELETE("/articles/:id", handler.Delete)
 }
 
 // FetchArticle will fetch the article based on given params
-func (a *ShowHandler) FetchShow(c echo.Context) error {
+func (a *ShowHandler) GetShows(c echo.Context) error {
 	numS := c.QueryParam("num")
 	num, _ := strconv.Atoi(numS)
 	cursor := c.QueryParam("cursor")
@@ -45,6 +46,25 @@ func (a *ShowHandler) FetchShow(c echo.Context) error {
 		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
 	}
 	c.Response().Header().Set(`X-Cursor`, nextCursor)
+	return c.JSON(http.StatusOK, listAr)
+}
+
+func (a *ShowHandler) GetShowByID(c echo.Context) error {
+
+	idS := c.Param("id")
+	id, _ := strconv.Atoi(idS)
+
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	listAr, err := a.ShowService.GetByID(ctx, int64(id))
+
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
 	return c.JSON(http.StatusOK, listAr)
 }
 

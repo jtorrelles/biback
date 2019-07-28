@@ -25,7 +25,8 @@ func NewShowRepository(Conn *sql.DB) repository.Repository {
 
 func (m *dbShowRepository) fetch(ctx context.Context, query string, args ...interface{}) ([]*models.Show, error) {
 
-	rows, err := m.Conn.QueryContext(ctx, query)
+	rows, err := m.Conn.QueryContext(ctx, query, args...)
+
 	//rows, err := m.Conn.QueryContext(ctx, query, args...)
 	if err != nil {
 		//logrus.Error(err)
@@ -85,13 +86,13 @@ func (m *dbShowRepository) fetch(ctx context.Context, query string, args ...inte
 func (m *dbShowRepository) Fetch(ctx context.Context, cursor string, num int64) ([]*models.Show, string, error) {
 	query := `SELECT ShowID, ShowNAME, ShowACTIVE, CategoryID_1, CategoryID_2, CategoryID_3, CategoryID_4, CategoryID_5, CategoryID_6, CategoryID_7, ShowAGE, ShowWEEKLY_NUT, ShowNUMBER_OF_CAST, ShowNUMBER_OF_MUSICIANS, ShowNUMBER_OF_STAGEHANDS, ShowNUMBER_OF_TRUCKS, ShowNOTES FROM shows`
 	fmt.Printf(cursor)
-	decodedCursor, err := DecodeCursor(cursor)
+	/*decodedCursor, err := DecodeCursor(cursor)
 	if err != nil && cursor != "" {
 		fmt.Printf("Error 1")
 		return nil, "", nil
-	}
+	}*/
 
-	res, err := m.fetch(ctx, query, decodedCursor, num)
+	res, err := m.fetch(ctx, query)
 	if err != nil {
 		fmt.Printf("Error 2")
 		return nil, "", err
@@ -104,6 +105,25 @@ func (m *dbShowRepository) Fetch(ctx context.Context, cursor string, num int64) 
 	}
 
 	return res, nextCursor, err
+
+}
+
+func (m *dbShowRepository) GetByID(ctx context.Context, id int64) ([]*models.Show, error) {
+	query := `SELECT ShowID, ShowNAME, ShowACTIVE, 
+					CategoryID_1, CategoryID_2, CategoryID_3, 
+					CategoryID_4, CategoryID_5, CategoryID_6, 
+					CategoryID_7, ShowAGE, ShowWEEKLY_NUT, ShowNUMBER_OF_CAST, 
+					ShowNUMBER_OF_MUSICIANS, ShowNUMBER_OF_STAGEHANDS, ShowNUMBER_OF_TRUCKS, ShowNOTES 
+			FROM shows 
+			WHERE ShowID=?;`
+
+	res, err := m.fetch(ctx, query, id)
+	if err != nil {
+		fmt.Printf("Error 2")
+		return nil, err
+	}
+
+	return res, err
 
 }
 

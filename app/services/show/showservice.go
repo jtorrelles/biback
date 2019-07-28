@@ -41,3 +41,21 @@ func (a *showService) Fetch(c context.Context, cursor string, num int64) ([]*mod
 
 	return listShow, nextCursor, nil
 }
+
+func (a *showService) GetByID(c context.Context, id int64) ([]*models.Show, error) {
+
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+
+	listShow, err := a.showRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	/*listArticle, err = a.fillAuthorDetails(ctx, listArticle)
+	if err != nil {
+		return nil, "", err
+	}*/
+
+	return listShow, nil
+}
