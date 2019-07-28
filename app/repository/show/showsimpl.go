@@ -50,6 +50,21 @@ func (m *dbShowRepository) fetch(ctx context.Context, query string, args ...inte
 		err = rows.Scan(
 			&t.Id,
 			&t.Name,
+			&t.Active,
+			&t.Category1,
+			&t.Category2,
+			&t.Category3,
+			&t.Category4,
+			&t.Category5,
+			&t.Category6,
+			&t.Category7,
+			&t.Age,
+			&t.WeeklyNut,
+			&t.NumberOfCast,
+			&t.NumberOfMusicians,
+			&t.NumberOfStageHands,
+			&t.NumberOfTrucks,
+			&t.Notes,
 		)
 
 		if err != nil {
@@ -68,7 +83,7 @@ func (m *dbShowRepository) fetch(ctx context.Context, query string, args ...inte
 }
 
 func (m *dbShowRepository) Fetch(ctx context.Context, cursor string, num int64) ([]*models.Show, string, error) {
-	query := `SELECT ShowID, ShowNAME FROM shows`
+	query := `SELECT ShowID, ShowNAME, ShowACTIVE, CategoryID_1, CategoryID_2, CategoryID_3, CategoryID_4, CategoryID_5, CategoryID_6, CategoryID_7, ShowAGE, ShowWEEKLY_NUT, ShowNUMBER_OF_CAST, ShowNUMBER_OF_MUSICIANS, ShowNUMBER_OF_STAGEHANDS, ShowNUMBER_OF_TRUCKS, ShowNOTES FROM shows`
 	fmt.Printf(cursor)
 	decodedCursor, err := DecodeCursor(cursor)
 	if err != nil && cursor != "" {
