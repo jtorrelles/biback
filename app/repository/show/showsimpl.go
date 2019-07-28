@@ -127,6 +127,65 @@ func (m *dbShowRepository) GetByID(ctx context.Context, id int64) ([]*models.Sho
 
 }
 
+func (m *dbShowRepository) Store(ctx context.Context, a *models.Show) error {
+	query := `INSERT INTO shows (ShowNAME, ShowACTIVE, 
+					CategoryID_1, CategoryID_2, CategoryID_3, 
+					CategoryID_4, CategoryID_5, CategoryID_6, 
+					CategoryID_7, ShowAGE, ShowWEEKLY_NUT, ShowNUMBER_OF_CAST, 
+					ShowNUMBER_OF_MUSICIANS, ShowNUMBER_OF_STAGEHANDS, ShowNUMBER_OF_TRUCKS, ShowNOTES) 
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	res, err := stmt.ExecContext(ctx, a.Name, a.Active, a.Category1, a.Category2, a.Category3, a.Category4, a.Category5, a.Category6, a.Category7, a.Age, a.WeeklyNut, a.NumberOfCast, a.NumberOfMusicians, a.NumberOfStageHands, a.NumberOfTrucks, a.Notes)
+	if err != nil {
+		return err
+	}
+
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	a.Id = int(lastID)
+	return nil
+}
+
+func (m *dbShowRepository) Update(ctx context.Context, id int64, a *models.Show) error {
+
+	query := `UPDATE shows SET ShowNAME = ?, ShowACTIVE = ?, 
+					CategoryID_1 = ?, CategoryID_2 = ?, CategoryID_3 = ?, 
+					CategoryID_4 = ?, CategoryID_5 = ?, CategoryID_6 = ?, 
+					CategoryID_7 = ?, ShowAGE = ?, ShowWEEKLY_NUT = ?, ShowNUMBER_OF_CAST = ?, 
+					ShowNUMBER_OF_MUSICIANS = ?, ShowNUMBER_OF_STAGEHANDS = ?, ShowNUMBER_OF_TRUCKS = ?, ShowNOTES = ? 
+				WHERE ShowID = ?;`
+
+	stmt, err := m.Conn.PrepareContext(ctx, query)
+	if err != nil {
+		return err
+	}
+
+	res, err := stmt.ExecContext(ctx, a.Name, a.Active, a.Category1, a.Category2, a.Category3, a.Category4, a.Category5, a.Category6, a.Category7, a.Age, a.WeeklyNut, a.NumberOfCast, a.NumberOfMusicians, a.NumberOfStageHands, a.NumberOfTrucks, a.Notes, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAfected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAfected != 1 {
+		err = fmt.Errorf("Weird  Behaviour. Total Affected: %d", rowsAfected)
+		return err
+	}
+
+	return nil
+}
+
 // DecodeCursor will decode cursor from user for mysql
 func DecodeCursor(encodedTime string) (time.Time, error) {
 	byt, err := base64.StdEncoding.DecodeString(encodedTime)

@@ -59,3 +59,33 @@ func (a *showService) GetByID(c context.Context, id int64) ([]*models.Show, erro
 
 	return listShow, nil
 }
+
+func (a *showService) Store(c context.Context, m *models.Show) error {
+
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+
+	//Validar que no exista
+
+	err := a.showRepo.Store(ctx, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a *showService) Update(c context.Context, id int64, m *models.Show) error {
+
+	ctx, cancel := context.WithTimeout(c, a.contextTimeout)
+	defer cancel()
+
+	//Validar que no exista
+
+	err := a.showRepo.Update(ctx, id, m)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

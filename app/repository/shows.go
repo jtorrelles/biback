@@ -10,6 +10,8 @@ import (
 type Repository interface {
 	Fetch(ctx context.Context, cursor string, num int64) (res []*models.Show, nextCursor string, err error)
 	GetByID(ctx context.Context, id int64) (res []*models.Show, err error)
+	Store(ctx context.Context, a *models.Show) error
+	Update(ctx context.Context, id int64, a *models.Show) error
 	//GetByTitle(ctx context.Context, title string) (*models.Article, error)
 	//Update(ctx context.Context, ar *models.Article) error
 	//Store(ctx context.Context, a *models.Article) error

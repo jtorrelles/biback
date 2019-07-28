@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"biback/app/models"
 	"biback/app/services"
 	"context"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo"
+	validator "gopkg.in/go-playground/validator.v9"
 )
 
 // ResponseError represent the reseponse error struct
@@ -26,7 +28,8 @@ func NewShowHandler(e *echo.Echo, us services.Showservice) {
 	}
 	e.GET("/shows", handler.GetShows)
 	e.GET("/shows/:id", handler.GetShowByID)
-	//e.POST("/articles", handler.Store)
+	e.POST("/shows", handler.Store)
+	e.PUT("/shows/:id", handler.Update)
 	//e.GET("/articles/:id", handler.GetByID)
 	//e.DELETE("/articles/:id", handler.Delete)
 }
@@ -68,6 +71,58 @@ func (a *ShowHandler) GetShowByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, listAr)
 }
 
+func (a *ShowHandler) Store(c echo.Context) error {
+	var show models.Show
+	err := c.Bind(&show)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	if ok, err := isRequestValid(&show); !ok {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	err = a.ShowService.Store(ctx, &show)
+
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusCreated, show)
+}
+
+func (a *ShowHandler) Update(c echo.Context) error {
+
+	idS := c.Param("id")
+	id, _ := strconv.Atoi(idS)
+
+	var show models.Show
+	err := c.Bind(&show)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	if ok, err := isRequestValid(&show); !ok {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	ctx := c.Request().Context()
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	err = a.ShowService.Update(ctx, int64(id), &show)
+
+	if err != nil {
+		return c.JSON(getStatusCode(err), ResponseError{Message: err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, show)
+}
+
 /*func GetShows(c echo.Context) error {
 	result := models.GetShows()
 	return c.JSON(http.StatusOK, result)
@@ -105,4 +160,13 @@ func getStatusCode(err error) int {
 	default:
 		return http.StatusInternalServerError
 	}*/
+}
+
+func isRequestValid(m *models.Show) (bool, error) {
+	validate := validator.New()
+	err := validate.Struct(m)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

@@ -3,7 +3,7 @@ package models
 import "gopkg.in/guregu/null.v3/zero"
 
 type Show struct {
-	Id                 string      `json:"id"`
+	Id                 int         `json:"id"`
 	Name               string      `json:"name"`
 	Active             string      `json:"active"`
 	Category1          int         `json:"category1"`
